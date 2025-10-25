@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TextInput, TouchableOpacity, View, Image } from "react-native";
 import { useSignUp } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
 import { styles } from "../../assets/styles/auth.styles.js";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../constants/colors.js";
-import { Image } from "expo-image";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function SignUpScreen() {
@@ -36,9 +35,13 @@ export default function SignUpScreen() {
       // and capture OTP code
       setPendingVerification(true);
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2));
+      if (err?.errors?.[0]?.code === "form_identifier_exists") {
+        setError("That email address is taken. Please try another.");
+      } else if (err?.errors?.[0]?.code === "form_password_length_too_short") {
+        setError("Passwords must be 8 characters or more.");
+      } else {
+        setError("An error occurred. Please try again.");
+      }
     }
   };
 
